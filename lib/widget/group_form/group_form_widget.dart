@@ -1,7 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:todo/widget/groups/group_widget.dart';
 
-class GroupFormWidget extends StatelessWidget {
+import 'group_form_widget_model.dart';
+
+class GroupFormWidget extends StatefulWidget {
   const GroupFormWidget({super.key});
+
+  @override
+  State<GroupFormWidget> createState() => _GroupFormWidgetState();
+}
+
+class _GroupFormWidgetState extends State<GroupFormWidget> {
+  final _model = GroupFormWidgetModel();
+  @override
+  Widget build(BuildContext context) {
+    return GroupFormWidgetModelInherited(
+      modelFormField: _model,
+      child: const _GroupFormWidgetBody(),
+    );
+  }
+}
+
+class _GroupFormWidgetBody extends StatelessWidget {
+  const _GroupFormWidgetBody({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +37,7 @@ class GroupFormWidget extends StatelessWidget {
         backgroundColor: Colors.indigo,
       ),
       body: const SafeArea(
-        child: _AddGroup(),
+        child: _GroupNameWidget(),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.indigo,
@@ -24,23 +45,21 @@ class GroupFormWidget extends StatelessWidget {
           Icons.done,
           color: Colors.white,
         ),
-        onPressed: () {},
+        onPressed: () => GroupFormWidgetModelInherited.read(context)
+            ?.modelFormField
+            .saveGroup(context),
       ),
     );
   }
 }
 
-class _AddGroup extends StatefulWidget {
-  const _AddGroup({super.key});
+class _GroupNameWidget extends StatelessWidget {
+  const _GroupNameWidget({super.key});
 
-  @override
-  State<_AddGroup> createState() => _AddGroupState();
-}
-
-class _AddGroupState extends State<_AddGroup> {
   @override
   Widget build(BuildContext context) {
-    final addGroupsController = TextEditingController();
+    final model = GroupFormWidgetModelInherited.read(context)?.modelFormField;
+    // final addGroupsController = TextEditingController();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -48,8 +67,10 @@ class _AddGroupState extends State<_AddGroup> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             TextField(
+              onChanged: (value) => model?.nameGroup = value,
+              onEditingComplete: () => model?.saveGroup(context),
               autofocus: true,
-              controller: addGroupsController,
+              // controller: addGroupsController,
               decoration: const InputDecoration(
                   border: OutlineInputBorder(), labelText: 'Name group'),
             ),
