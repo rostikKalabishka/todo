@@ -15,7 +15,7 @@ class _GroupsWidgetState extends State<GroupsWidget> {
   @override
   Widget build(BuildContext context) {
     return GroupsWidgetModelInherited(
-        child: const _GroupsWidgetBody(), model: _model);
+        model: _model, child: const _GroupsWidgetBody());
   }
 }
 

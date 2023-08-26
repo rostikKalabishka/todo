@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:todo/widget/router/router.dart';
+import 'package:todo/router/router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

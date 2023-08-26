@@ -58,7 +58,7 @@ class _GroupNameWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final model = GroupFormWidgetModelInherited.read(context)?.modelFormField;
-    // final addGroupsController = TextEditingController();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
