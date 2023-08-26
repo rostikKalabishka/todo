@@ -8,8 +8,9 @@ class GroupsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
-        title: const Text('ToDo Groups'),
+        title: const Text('ToDo Groups', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.indigo,
       ),
       body: const SafeArea(
@@ -17,8 +18,13 @@ class GroupsWidget extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.indigo,
-        child: const Icon(Icons.add_task),
-        onPressed: () {},
+        child: const Icon(
+          Icons.add_task,
+          color: Colors.white,
+        ),
+        onPressed: () {
+          Navigator.of(context).pushNamed('/groups/form');
+        },
       ),
     );
   }
