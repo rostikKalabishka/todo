@@ -1,8 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-class GroupsWidget extends StatelessWidget {
+import 'groups_widget_model.dart';
+
+class GroupsWidget extends StatefulWidget {
   const GroupsWidget({super.key});
+
+  @override
+  State<GroupsWidget> createState() => _GroupsWidgetState();
+}
+
+class _GroupsWidgetState extends State<GroupsWidget> {
+  final _model = GroupsWidgetModel();
+  @override
+  Widget build(BuildContext context) {
+    return GroupsWidgetModelInherited(
+        child: const _GroupsWidgetBody(), model: _model);
+  }
+}
+
+class _GroupsWidgetBody extends StatelessWidget {
+  const _GroupsWidgetBody({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +32,7 @@ class GroupsWidget extends StatelessWidget {
         backgroundColor: Colors.indigo,
       ),
       body: const SafeArea(
-        child: _GroupList(),
+        child: _GroupListWidget(),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.indigo,
@@ -30,26 +48,23 @@ class GroupsWidget extends StatelessWidget {
   }
 }
 
-class _GroupList extends StatefulWidget {
-  const _GroupList({super.key});
+class _GroupListWidget extends StatelessWidget {
+  const _GroupListWidget({super.key});
 
-  @override
-  State<_GroupList> createState() => _GroupListState();
-}
-
-class _GroupListState extends State<_GroupList> {
   @override
   Widget build(BuildContext context) {
+    final groupsCount =
+        GroupsWidgetModelInherited.watch(context)?.model.groups.length ?? 0;
     return ListView.separated(
       itemBuilder: (BuildContext context, int index) {
-        return const Divider(
-          height: 1,
-        );
-      },
-      itemCount: 100,
-      separatorBuilder: (BuildContext context, int index) {
         return _GroupListRowWidget(
           indexList: index,
+        );
+      },
+      itemCount: groupsCount,
+      separatorBuilder: (BuildContext context, int index) {
+        return const Divider(
+          height: 1,
         );
       },
     );
@@ -62,13 +77,17 @@ class _GroupListRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final model = GroupsWidgetModelInherited.read(context)!.model;
+    final group = model.groups[indexList];
     return Slidable(
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
         children: [
           // A SlidableAction can have an icon and/or a label.
           SlidableAction(
-            onPressed: (context) {},
+            onPressed: (context) {
+              model.deleteGroup(indexList);
+            },
             backgroundColor: Color(0xFFFE4A49),
             foregroundColor: Colors.white,
             icon: Icons.delete,
@@ -80,7 +99,7 @@ class _GroupListRowWidget extends StatelessWidget {
         color: Colors.white,
         child: ListTile(
           onTap: () {},
-          title: const Text('2133123123213123'),
+          title: Text(group.name),
           trailing: const Icon(Icons.chevron_right),
         ),
       ),

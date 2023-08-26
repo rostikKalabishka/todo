@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:todo/widget/groups/group_widget.dart';
 
 import 'group_form_widget_model.dart';
 
