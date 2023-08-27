@@ -41,7 +41,7 @@ class _GroupsWidgetBody extends StatelessWidget {
           color: Colors.white,
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed('/groups/form');
+          GroupsWidgetModelInherited.watch(context)?.model.showForm(context);
         },
       ),
     );
@@ -98,7 +98,9 @@ class _GroupListRowWidget extends StatelessWidget {
       child: ColoredBox(
         color: Colors.white,
         child: ListTile(
-          onTap: () {},
+          onTap: () {
+            model.showTasks(context, indexList);
+          },
           title: Text(group.name),
           trailing: const Icon(Icons.chevron_right),
         ),
