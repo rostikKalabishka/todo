@@ -9,7 +9,8 @@ class TaskFormWidgetModel {
   var taskText = '';
 
   TaskFormWidgetModel({required this.groupKey});
-  void saveTasks(BuildContext context) async {
+
+  void saveTask(BuildContext context) async {
     if (taskText.isEmpty) return;
 
     if (!Hive.isAdapterRegistered(1)) {
@@ -18,42 +19,43 @@ class TaskFormWidgetModel {
     if (!Hive.isAdapterRegistered(2)) {
       Hive.registerAdapter(TaskAdapter());
     }
-
+    final taskBox = await Hive.openBox<Task>('tasks_box');
     final task = Task(text: taskText, isDone: false);
-
-    final tasksBox = await Hive.openBox<Task>('tasks_box');
-    await tasksBox.add(task);
+    await taskBox.add(task);
 
     final groupBox = await Hive.openBox<Group>('groups_box');
     final group = groupBox.get(groupKey);
-    group?.addTask(tasksBox, task);
-
+    group?.addTask(taskBox, task);
     Navigator.of(context).pop();
   }
-
-  // GroupFormWidgetModel({required this.nameGroup});
 }
 
-class TaskFormWidgetInherited extends InheritedWidget {
+class TaskFormWidgetModelProvider extends InheritedWidget {
   final TaskFormWidgetModel model;
-  const TaskFormWidgetInherited(
-      {super.key, required Widget child, required this.model})
-      : super(child: child);
 
-  static TaskFormWidgetInherited? watch(BuildContext context) {
+  const TaskFormWidgetModelProvider({
+    Key? key,
+    required this.model,
+    required Widget child,
+  }) : super(
+          key: key,
+          child: child,
+        );
+
+  static TaskFormWidgetModelProvider? watch(BuildContext context) {
     return context
-        .dependOnInheritedWidgetOfExactType<TaskFormWidgetInherited>();
+        .dependOnInheritedWidgetOfExactType<TaskFormWidgetModelProvider>();
   }
 
-  static TaskFormWidgetInherited? read(BuildContext context) {
+  static TaskFormWidgetModelProvider? read(BuildContext context) {
     final widget = context
-        .getElementForInheritedWidgetOfExactType<TaskFormWidgetInherited>()
+        .getElementForInheritedWidgetOfExactType<TaskFormWidgetModelProvider>()
         ?.widget;
-    return widget is TaskFormWidgetInherited ? widget : null;
+    return widget is TaskFormWidgetModelProvider ? widget : null;
   }
 
   @override
-  bool updateShouldNotify(TaskFormWidgetInherited oldWidget) {
+  bool updateShouldNotify(TaskFormWidgetModelProvider oldWidget) {
     return false;
   }
 }

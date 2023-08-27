@@ -14,7 +14,7 @@ class _GroupsWidgetState extends State<GroupsWidget> {
   final _model = GroupsWidgetModel();
   @override
   Widget build(BuildContext context) {
-    return GroupsWidgetModelInherited(
+    return GroupsWidgetModelProvider(
         model: _model, child: const _GroupsWidgetBody());
   }
 }
@@ -31,54 +31,51 @@ class _GroupsWidgetBody extends StatelessWidget {
         title: const Text('ToDo Groups', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.indigo,
       ),
-      body: const SafeArea(
-        child: _GroupListWidget(),
-      ),
+      body: const _GroupListWidget(),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.indigo,
+        onPressed: () =>
+            GroupsWidgetModelProvider.read(context)?.model.showForm(context),
         child: const Icon(
-          Icons.add_task,
+          Icons.add,
           color: Colors.white,
         ),
-        onPressed: () {
-          GroupsWidgetModelInherited.watch(context)?.model.showForm(context);
-        },
       ),
     );
   }
 }
 
 class _GroupListWidget extends StatelessWidget {
-  const _GroupListWidget({super.key});
+  const _GroupListWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final groupsCount =
-        GroupsWidgetModelInherited.watch(context)?.model.groups.length ?? 0;
+        GroupsWidgetModelProvider.watch(context)?.model.groups.length ?? 0;
     return ListView.separated(
-      itemBuilder: (BuildContext context, int index) {
-        return _GroupListRowWidget(
-          indexList: index,
-        );
-      },
       itemCount: groupsCount,
+      itemBuilder: (BuildContext context, int index) {
+        return _GroupListRowWidget(indexInList: index);
+      },
       separatorBuilder: (BuildContext context, int index) {
-        return const Divider(
-          height: 1,
-        );
+        return const Divider(height: 1);
       },
     );
   }
 }
 
 class _GroupListRowWidget extends StatelessWidget {
-  final int indexList;
-  const _GroupListRowWidget({super.key, required this.indexList});
+  final int indexInList;
+  const _GroupListRowWidget({
+    Key? key,
+    required this.indexInList,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final model = GroupsWidgetModelInherited.read(context)!.model;
-    final group = model.groups[indexList];
+    final model = GroupsWidgetModelProvider.read(context)!.model;
+    final group = model.groups[indexInList];
+
     return Slidable(
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
@@ -86,7 +83,7 @@ class _GroupListRowWidget extends StatelessWidget {
           // A SlidableAction can have an icon and/or a label.
           SlidableAction(
             onPressed: (context) {
-              model.deleteGroup(indexList);
+              model.deleteGroup(indexInList);
             },
             backgroundColor: Color(0xFFFE4A49),
             foregroundColor: Colors.white,
@@ -99,7 +96,7 @@ class _GroupListRowWidget extends StatelessWidget {
         color: Colors.white,
         child: ListTile(
           onTap: () {
-            model.showTasks(context, indexList);
+            model.showTasks(context, indexInList);
           },
           title: Text(group.name),
           trailing: const Icon(Icons.chevron_right),

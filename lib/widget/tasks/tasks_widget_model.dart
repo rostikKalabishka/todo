@@ -4,13 +4,17 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:todo/domain/entity/group.dart';
 import 'package:todo/domain/entity/task.dart';
 
-class TasksWidgetModal extends ChangeNotifier {
+class TasksWidgetModel extends ChangeNotifier {
   int groupKey;
   late final Future<Box<Group>> _groupBox;
+  var _tasks = <Task>[];
+
+  List<Task> get tasks => _tasks.toList();
+
   Group? _group;
   Group? get group => _group;
 
-  TasksWidgetModal({required this.groupKey}) {
+  TasksWidgetModel({required this.groupKey}) {
     _setup();
   }
 
@@ -24,31 +28,65 @@ class TasksWidgetModal extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _readTasks() {
+    _tasks = _group?.tasks ?? <Task>[];
+    notifyListeners();
+  }
+
+  void _setupListenTasks() async {
+    final box = await _groupBox;
+    _readTasks();
+    box.listenable(keys: <dynamic>[groupKey]).addListener(_readTasks);
+  }
+
+  void deleteTask(int groupIndex) async {
+    await _group?.tasks?.deleteFromHive(groupIndex);
+    await _group?.save();
+  }
+
+  void doneToggle(int groupIndex) async {
+    final task = group?.tasks?[groupIndex];
+    final currentState = task?.isDone ?? false;
+    task?.isDone = !currentState;
+    await task?.save();
+    notifyListeners();
+  }
+
   void _setup() {
     if (!Hive.isAdapterRegistered(1)) {
       Hive.registerAdapter(GroupAdapter());
     }
     _groupBox = Hive.openBox<Group>('groups_box');
-
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(TaskAdapter());
+    }
+    Hive.openBox<Task>('tasks_box');
     _loadGroup();
+    _setupListenTasks();
   }
 }
 
-class TasksWidgetModelInherited extends InheritedNotifier {
-  final TasksWidgetModal model;
-  const TasksWidgetModelInherited(
-      {super.key, required Widget child, required this.model})
-      : super(child: child, notifier: model);
+class TasksWidgetModelProvider extends InheritedNotifier {
+  final TasksWidgetModel model;
+  const TasksWidgetModelProvider({
+    Key? key,
+    required this.model,
+    required Widget child,
+  }) : super(
+          key: key,
+          notifier: model,
+          child: child,
+        );
 
-  static TasksWidgetModelInherited? watch(BuildContext context) {
+  static TasksWidgetModelProvider? watch(BuildContext context) {
     return context
-        .dependOnInheritedWidgetOfExactType<TasksWidgetModelInherited>();
+        .dependOnInheritedWidgetOfExactType<TasksWidgetModelProvider>();
   }
 
-  static TasksWidgetModelInherited? read(BuildContext context) {
+  static TasksWidgetModelProvider? read(BuildContext context) {
     final widget = context
-        .getElementForInheritedWidgetOfExactType<TasksWidgetModelInherited>()
+        .getElementForInheritedWidgetOfExactType<TasksWidgetModelProvider>()
         ?.widget;
-    return widget is TasksWidgetModelInherited ? widget : null;
+    return widget is TasksWidgetModelProvider ? widget : null;
   }
 }

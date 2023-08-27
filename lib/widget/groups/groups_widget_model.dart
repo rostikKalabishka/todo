@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todo/domain/entity/group.dart';
 
+import '../../domain/entity/task.dart';
+
 class GroupsWidgetModel extends ChangeNotifier {
   var _groups = <Group>[];
 
@@ -22,11 +24,12 @@ class GroupsWidgetModel extends ChangeNotifier {
     if (!Hive.isAdapterRegistered(1)) {
       Hive.registerAdapter(GroupAdapter());
     }
-
     final box = await Hive.openBox<Group>('groups_box');
     final groupKey = box.keyAt(groupIndex) as int;
+
     unawaited(
-        Navigator.of(context).pushNamed('/groups/tasks', arguments: groupKey));
+      Navigator.of(context).pushNamed('/groups/tasks', arguments: groupKey),
+    );
   }
 
   void deleteGroup(int groupIndex) async {
@@ -34,6 +37,7 @@ class GroupsWidgetModel extends ChangeNotifier {
       Hive.registerAdapter(GroupAdapter());
     }
     final box = await Hive.openBox<Group>('groups_box');
+    await box.getAt(groupIndex)?.tasks?.deleteAllFromHive();
     await box.deleteAt(groupIndex);
   }
 
@@ -47,28 +51,36 @@ class GroupsWidgetModel extends ChangeNotifier {
       Hive.registerAdapter(GroupAdapter());
     }
     final box = await Hive.openBox<Group>('groups_box');
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(TaskAdapter());
+    }
+    await Hive.openBox<Task>('tasks_box');
     _readGroupsFromHive(box);
-    box.listenable().addListener(() {
-      _readGroupsFromHive(box);
-    });
+    box.listenable().addListener(() => _readGroupsFromHive(box));
   }
 }
 
-class GroupsWidgetModelInherited extends InheritedNotifier {
+class GroupsWidgetModelProvider extends InheritedNotifier {
   final GroupsWidgetModel model;
-  const GroupsWidgetModelInherited(
-      {super.key, required Widget child, required this.model})
-      : super(child: child, notifier: model);
+  const GroupsWidgetModelProvider({
+    Key? key,
+    required this.model,
+    required Widget child,
+  }) : super(
+          key: key,
+          notifier: model,
+          child: child,
+        );
 
-  static GroupsWidgetModelInherited? watch(BuildContext context) {
+  static GroupsWidgetModelProvider? watch(BuildContext context) {
     return context
-        .dependOnInheritedWidgetOfExactType<GroupsWidgetModelInherited>();
+        .dependOnInheritedWidgetOfExactType<GroupsWidgetModelProvider>();
   }
 
-  static GroupsWidgetModelInherited? read(BuildContext context) {
+  static GroupsWidgetModelProvider? read(BuildContext context) {
     final widget = context
-        .getElementForInheritedWidgetOfExactType<GroupsWidgetModelInherited>()
+        .getElementForInheritedWidgetOfExactType<GroupsWidgetModelProvider>()
         ?.widget;
-    return widget is GroupsWidgetModelInherited ? widget : null;
+    return widget is GroupsWidgetModelProvider ? widget : null;
   }
 }
