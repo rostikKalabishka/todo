@@ -20,14 +20,11 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
   @override
   Widget build(BuildContext context) {
     final model = _model;
-    if (model != null) {
-      return TaskFormWidgetModelProvider(
-        model: model,
-        child: const _TaskFormWidgetBody(),
-      );
-    } else {
-      return const Center(child: CircularProgressIndicator());
-    }
+
+    return TaskFormWidgetModelProvider(
+      model: model,
+      child: const _TaskFormWidgetBody(),
+    );
   }
 }
 
