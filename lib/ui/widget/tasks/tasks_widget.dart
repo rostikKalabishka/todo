@@ -1,31 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:todo/widget/tasks/tasks_widget_model.dart';
+import 'package:todo/ui/widget/tasks/tasks_widget_model.dart';
 
 class TasksWidget extends StatefulWidget {
-  const TasksWidget({Key? key}) : super(key: key);
+  final int groupKey;
+  const TasksWidget({Key? key, required this.groupKey}) : super(key: key);
 
   @override
   _TasksWidgetState createState() => _TasksWidgetState();
 }
 
 class _TasksWidgetState extends State<TasksWidget> {
-  TasksWidgetModel? _model;
+  late final TasksWidgetModel _model;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (_model == null) {
-      final groupKey = ModalRoute.of(context)!.settings.arguments as int;
-      _model = TasksWidgetModel(groupKey: groupKey);
-    }
+  void initState() {
+    super.initState();
+    _model = TasksWidgetModel(groupKey: widget.groupKey);
   }
 
   @override
   Widget build(BuildContext context) {
     return TasksWidgetModelProvider(
-      model: _model!,
+      model: _model,
       child: const TasksWidgetBody(),
     );
   }
@@ -37,7 +34,7 @@ class TasksWidgetBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final model = TasksWidgetModelProvider.watch(context)?.model;
-    final title = model?.group?.name ?? 'Задачи';
+    final title = model?.group?.name ?? 'Tasks';
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),

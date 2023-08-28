@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:todo/widget/task_form/task_form_widget_model.dart';
+import 'package:todo/ui/widget/task_form/task_form_widget_model.dart';
 
 class TaskFormWidget extends StatefulWidget {
-  const TaskFormWidget({super.key});
+  final groupKey;
+  const TaskFormWidget({super.key, required this.groupKey});
 
   @override
   State<TaskFormWidget> createState() => _TaskFormWidgetState();
 }
 
 class _TaskFormWidgetState extends State<TaskFormWidget> {
-  TaskFormWidgetModel? _model;
-
+  late final TaskFormWidgetModel _model;
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_model == null) {
-      final groupKey = ModalRoute.of(context)!.settings.arguments as int;
-      _model = TaskFormWidgetModel(groupKey: groupKey);
-    }
+  void initState() {
+    super.initState();
+    _model = TaskFormWidgetModel(groupKey: widget.groupKey);
   }
 
   @override
@@ -25,8 +22,8 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
     final model = _model;
     if (model != null) {
       return TaskFormWidgetModelProvider(
-        child: const _TaskFormWidgetBody(),
         model: model,
+        child: const _TaskFormWidgetBody(),
       );
     } else {
       return const Center(child: CircularProgressIndicator());
